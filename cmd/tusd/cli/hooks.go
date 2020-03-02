@@ -1,7 +1,11 @@
 package cli
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -127,6 +131,22 @@ func invokeHookSync(typ hooks.HookType, info handler.HookEvent, captureOutput bo
 	switch typ {
 	case hooks.HookPostFinish:
 		logEv(stdout, "UploadFinished", "id", id, "size", strconv.FormatInt(size, 10))
+		info := handler.FileInfo{}
+		file := filepath.Join(DefaultDataDir(), id+".info")
+		data, err := ioutil.ReadFile(file)
+		if err != nil {
+			return nil, err
+		}
+		if err := json.Unmarshal(data, &info); err != nil {
+			return nil, err
+		}
+		err = os.Rename(filepath.Join(DefaultDataDir(), id), filepath.Join(DefaultDataDir(), info.MetaData["filename"]))
+		if err != nil {
+			logEv(stdout, "Rename file", filepath.Join(DefaultDataDir(), id), " err:", err.Error())
+			return nil, err
+		}
+		_ = os.Remove(file)
+
 	case hooks.HookPostTerminate:
 		logEv(stdout, "UploadTerminated", "id", id)
 	}
