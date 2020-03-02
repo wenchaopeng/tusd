@@ -23,15 +23,15 @@ FROM alpine:3.9
 COPY --from=builder /go/bin/tusd /usr/local/bin/tusd
 
 RUN apk add --no-cache ca-certificates jq gcc \
-    && addgroup -g 1000 tusd \
-    && adduser -u 1000 -G tusd -s /bin/sh -D tusd \
+#    && addgroup -g 1000 tusd \
+#   && adduser -u 1000 -G tusd -s /bin/sh -D tusd \
     && mkdir -p /srv/tusd-hooks \
     && mkdir -p /srv/tusd-data \
-    && chown tusd:tusd /srv/tusd-data
+#    && chown tusd:tusd /srv/tusd-data
 
 WORKDIR /srv/tusd-data
 EXPOSE 1080
 ENTRYPOINT ["tusd"]
 CMD ["--hooks-dir","/srv/tusd-hooks"]
 
-USER tusd
+#USER tusd
