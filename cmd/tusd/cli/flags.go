@@ -43,7 +43,7 @@ func ParseFlags() {
 	flag.StringVar(&Flags.HttpHost, "host", "0.0.0.0", "Host to bind HTTP server to")
 	flag.StringVar(&Flags.HttpPort, "port", "1080", "Port to bind HTTP server to")
 	flag.StringVar(&Flags.HttpSock, "unix-sock", "", "If set, will listen to a UNIX socket at this location instead of a TCP socket")
-	flag.Int64Var(&Flags.MaxSize, "max-size", 0, "Maximum size of a single upload in bytes")
+	flag.Int64Var(&Flags.MaxSize, "max-size", 209715200, "Maximum size of a single upload in bytes")
 	flag.StringVar(&Flags.UploadDir, "upload-dir", "./data", "Directory to store uploads in")
 	flag.StringVar(&Flags.Basepath, "base-path", "/files/", "Basepath of the HTTP server")
 	flag.Int64Var(&Flags.Timeout, "timeout", 6*1000, "Read timeout for connections in milliseconds.  A zero value means that reads will not timeout")

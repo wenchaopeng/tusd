@@ -2,7 +2,9 @@ package cli
 
 import (
 	"os"
+	"os/user"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/tus/tusd/pkg/filelocker"
@@ -18,6 +20,11 @@ import (
 )
 
 var Composer *handler.StoreComposer
+
+const (
+	cfgDir    = "virtualRouter/cdr"
+	nixCfgDir = ".virtualRouter/cdr"
+)
 
 func CreateComposer() {
 	// Attempt to use S3 as a backend if the -s3-bucket option has been supplied.
@@ -69,11 +76,11 @@ func CreateComposer() {
 		locker := memorylocker.New()
 		locker.UseIn(Composer)
 	} else {
-		dir, err := filepath.Abs(Flags.UploadDir)
-		if err != nil {
-			stderr.Fatalf("Unable to make absolute path: %s", err)
-		}
-
+		//dir, err := filepath.Abs(Flags.UploadDir)
+		//if err != nil {
+		//	stderr.Fatalf("Unable to make absolute path: %s", err)
+		//}
+		dir := DefaultDataDir()
 		stdout.Printf("Using '%s' as directory storage.\n", dir)
 		if err := os.MkdirAll(dir, os.FileMode(0774)); err != nil {
 			stderr.Fatalf("Unable to ensure directory exists: %s", err)
@@ -87,4 +94,28 @@ func CreateComposer() {
 	}
 
 	stdout.Printf("Using %.2fMB as maximum size.\n", float64(Flags.MaxSize)/1024/1024)
+}
+
+func DefaultDataDir() string {
+	home := homeDir()
+	if home != "" {
+		if runtime.GOOS == "darwin" {
+			return filepath.Join(home, "Library", "Application Support", cfgDir)
+		} else if runtime.GOOS == "windows" {
+			return filepath.Join(home, "AppData", "Roaming", cfgDir)
+		} else {
+			return filepath.Join(home, nixCfgDir)
+		}
+	}
+	return ""
+}
+
+func homeDir() string {
+	if home := os.Getenv("HOME"); home != "" {
+		return home
+	}
+	if usr, err := user.Current(); err == nil {
+		return usr.HomeDir
+	}
+	return ""
 }
